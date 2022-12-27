@@ -26,23 +26,23 @@ public class BallCollision : MonoBehaviour
 
     private void OnCollisionEnter(Collision cls)
     {
-        string objIsmi = cls.gameObject.name;
-        if (objIsmi.Equals("bitis"))
+        string objName = cls.gameObject.name;
+        if (objName.Equals("bitis"))
         {
             gManager.NextScene(SceneManager.GetActiveScene().buildIndex);
             GetComponent<BallHealt>().IncreaseHealt(1, 10);
         }
-        else if (!objIsmi.Equals("Zemin") && !objIsmi.Equals("LabirentZemin") && !objIsmi.Equals("first") && !objIsmi.Equals("finish"))
+        else if (!objName.Equals("Zemin") && !objName.Equals("LabirentZemin") && !objName.Equals("first") && !objName.Equals("finish"))
         {
             GetComponent<BallHealt>().TakeDamage(1);
             _gameRunning = GetComponent<BallHealt>().IsDead();
         }
-        if (objIsmi.Equals("first"))
+        if (objName.Equals("first"))
         {
             bControl.finish.gameObject.SetActive(true);
 
         }
-        if (objIsmi.Equals("finish") && SceneManager.GetActiveScene() == SceneManager.GetSceneByName("bolum2"))
+        if (objName.Equals("finish") && SceneManager.GetActiveScene() == SceneManager.GetSceneByName("bolum2"))
         {
             print("healt:" + BallControl.healt);
             print("time:" + BallControl.timeCounter);
