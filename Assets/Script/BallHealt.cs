@@ -1,41 +1,38 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 public class BallHealt : MonoBehaviour
 {
-    private BallControl bControl;
-    private void Start()
+    // Reference to the UI Manager to update the health display.
+    [SerializeField] private UiManager uiManager;
+
+    // Variable to store the ball's health.
+    private float healt;
+
+    private void Awake()
     {
-        bControl= GetComponent<BallControl>();
+        // Load the health value from PlayerPrefs, with a default value of 5 if not previously saved.
+        healt = PlayerPrefs.GetFloat("healt", 5);
+
+        // Update the UI with the current health value.
+        uiManager.UpdateText(TextEnum.Healt, healt.ToString());
     }
+
+    // Method to reduce the ball's health by a specified amount.
     public void TakeDamage(int _amount)
     {
-       BallControl.healt -= _amount;
-       bControl.UpdateTexts(bControl.healtText.gameObject.name);
-    }
+        // Subtract the damage amount from the health.
+        healt -= _amount;
 
-    public void IncreaseHealt(int _amount , int _timeAmount)
-    {
-        if(BallControl.healt < 5) 
-        BallControl.healt += _amount;
-        
-        BallControl.timeCounter += _timeAmount;
-        bControl.UpdateTexts(bControl.healtText.gameObject.name);
-    }
+        // Update the UI with the new health value.
+        uiManager.UpdateText(TextEnum.Healt, healt.ToString());
 
-    public bool IsDead()
-    {
-        bool val = true;
-
-        if (BallControl.healt == 0)
+        // If the health drops to zero or below, trigger the game over logic.
+        if (healt <= 0)
         {
-            val = false;
+            GameManager.instance.FinishTheGame();
         }
-        else
-        {
-            val = true;
-        }
-
-        return val;
     }
+
+    // Public property to get the current health value.
+    public float Healt => healt;
 }

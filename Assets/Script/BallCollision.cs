@@ -1,54 +1,37 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class BallCollision : MonoBehaviour
 {
-    [SerializeField] GameManager gManager;
+    // Reference to the BallHealth component.
+    private BallHealt ballHealt;
 
-    bool _gameComplete;
-    bool _gameRunning = true;
-
-    private BallControl bControl;
+    // Damage value to apply when hitting a wall.
+    private int _damage = 1;
 
     private void Start()
     {
-        bControl= GetComponent<BallControl>();
-    }
-
-    public void SendGameBool(out bool _GameComplete , out bool _GameRunning)
-    {
-        _GameComplete = _gameComplete;
-        _GameRunning = _gameRunning;
+        // Cache the BallHealt component attached to this GameObject.
+        ballHealt = GetComponent<BallHealt>();
     }
 
     private void OnCollisionEnter(Collision cls)
     {
-        string objName = cls.gameObject.name;
-        if (objName.Equals("bitis"))
+        // If the object collided with is named "finish", proceed to the next level.
+        if (cls.gameObject.name.Equals("finish"))
         {
-            gManager.NextScene(SceneManager.GetActiveScene().buildIndex);
-            GetComponent<BallHealt>().IncreaseHealt(1, 10);
+            GameManager.instance.NextLevel();
         }
-        else if (!objName.Equals("Zemin") && !objName.Equals("LabirentZemin") && !objName.Equals("first") && !objName.Equals("finish"))
-        {
-            GetComponent<BallHealt>().TakeDamage(1);
-            _gameRunning = GetComponent<BallHealt>().IsDead();
-        }
-        if (objName.Equals("first"))
-        {
-            bControl.finish.gameObject.SetActive(true);
 
-        }
-        if (objName.Equals("finish") && SceneManager.GetActiveScene() == SceneManager.GetSceneByName("bolum2"))
+        // If the object has the "Wall" tag, apply damage to the ball.
+        if (cls.gameObject.CompareTag("Wall"))
         {
-            print("healt:" + BallControl.healt);
-            print("time:" + BallControl.timeCounter);
-            _gameComplete = true;
-            gManager.sendDefaultValue(out BallControl.healt, out BallControl.timeCounter);
-            gManager.NextScene(SceneManager.GetActiveScene().buildIndex);
+            ballHealt.TakeDamage(_damage);
+        }
+
+        // If the object collided with is named "gameStep", trigger the game step logic.
+        if (cls.gameObject.name.Equals("gameStep"))
+        {
+            GameManager.instance.GameStepCollided();
         }
     }
 }

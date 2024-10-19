@@ -1,69 +1,29 @@
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 
 public class BallControl : MonoBehaviour
 {
-    [SerializeField] GameManager gManager;
-    
+    // Reference to the Rigidbody component of the ball.
     private Rigidbody rb;
-    
-    public GameObject finish;
-    
-    [SerializeField] Button levelButton;
-    [SerializeField] Text timerText;
-    public Text healtText;
-    [SerializeField] Text caseText;
 
-    public float velocity = 6f;
-    
-    public static float timeCounter = 60;
-    public static int healt = 5;
+    // Movement speed of the ball.
+    [SerializeField] private float velocity = 2f;
 
-    bool gameComplete;
-    bool gameRunning = true;
+    // Vector to store movement input.
+    private Vector3 movementVector;
 
-
-    Vector3 movementVector;
-    void Start()
+    private void Start()
     {
-        UpdateTexts(healtText.gameObject.name);
+        // Cache the Rigidbody component for physics-based movement.
         rb = GetComponent<Rigidbody>();
     }
 
-    void Update()
-    {
-        if(Input.GetKeyDown(KeyCode.X))
-        {
-            print("healt:"+healt);
-            print("time:"+timeCounter);
-        }
-        GetComponent<BallCollision>().SendGameBool(out gameComplete, out gameRunning);
-        if (gameRunning && !gameComplete)
-        {
-            timeCounter -= Time.deltaTime;
-            UpdateTexts(timerText.gameObject.name);
-        }
-        else if (!gameComplete)
-        {
-            UpdateTexts(caseText.gameObject.name);
-            levelButton.gameObject.SetActive(true);
-            gManager.sendDefaultValue(out healt, out timeCounter);
-        }
-
-        if (timeCounter <0)
-            gameRunning =false;
-        
-        if(Input.GetKey(KeyCode.Escape))
-            Application.Quit();
-
-    }
     private void FixedUpdate()
     {
-        if (gameRunning && !gameComplete) 
+        // If the game is not over, allow the ball to move.
+        // Otherwise, stop all ball velocities (movement and rotation).
+        if (!GameManager.instance.GameOver)
         {
-            MovementInput();
-            rb.AddForce(CalculateMovementVector(movementVector.z,movementVector.x,velocity));
+            Move();
         }
         else
         {
@@ -71,41 +31,31 @@ public class BallControl : MonoBehaviour
         }
     }
 
-    void MovementInput()
+    // Moves the ball based on player input from the horizontal and vertical axes.
+    private void Move()
     {
+        // Get input from the horizontal (X) and vertical (Z) axes.
         movementVector.x = Input.GetAxis("Horizontal");
         movementVector.z = Input.GetAxis("Vertical");
+
+        // Apply movement force to the ball.
+        rb.AddForce(CalculateMovementVector(movementVector.z, movementVector.x, velocity));
     }
 
-    void StopVelocitiesOfBall()
+    // Stops the ball's velocity and angular velocity (rotation).
+    private void StopVelocitiesOfBall()
     {
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
     }
 
-    Vector3 CalculateMovementVector (float _horizontal, float _vertical, float _moveSpeed)
+    // Calculates the movement vector based on input and movement speed.
+    private Vector3 CalculateMovementVector(float _horizontal, float _vertical, float _moveSpeed)
     {
+        // Calculate movement on the X and Z axes with given velocity.
         float x = _horizontal * velocity;
-        float z = _vertical * -velocity;
+        float z = _vertical * -velocity;  // Inverted Z for correct movement.
 
         return new Vector3(x, 0f, z);
     }
-
-    public void UpdateTexts(string _name)
-    {
-        switch (_name)
-        {
-            case "timer":
-                timerText.text = (int)timeCounter + "";
-                break;
-            case "healt":
-                healtText.text = healt + "";
-                break;
-            case "case":
-                caseText.text = "Oyun Tamamlanamadý.";
-                break;
-        }
-    }
-
-    
 }
